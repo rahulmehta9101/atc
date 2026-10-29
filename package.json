@@ -1,0 +1,17 @@
+{
+  "name": "abhay-live-prices",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.mjs",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@mathieuc/tradingview": "4.1.0",
+    "cheerio": "1.1.2"
+  }
+}
