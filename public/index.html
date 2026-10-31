@@ -1671,14 +1671,14 @@
         let io; function reveal() { io && io.disconnect(); const els = document.querySelectorAll(".rv:not(.in)"); if (!("IntersectionObserver" in window)) { els.forEach(e => e.classList.add("in")); return } io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target) } }), { threshold: .1 }); els.forEach(e => io.observe(e)) }
         const closeM = x => document.querySelectorAll(".dd.open").forEach(l => { if (l !== x) { l.classList.remove("open"); l.querySelector(".cv").setAttribute("aria-expanded", "false") } });
         function shut() { closeM(); $("header").classList.remove("m"); $("#bg").setAttribute("aria-expanded", "false"); $("#bg").setAttribute("aria-label", "Open menu") }
-        function go(t, init) {
+        function go(t, skipHistory) {
             let r = T[t], p; if (!r && t.startsWith("blog-")) { p = BL.find(b => "blog-" + b.s == t); if (p) r = [p.t, p.x, () => post(p)] }
             if (!r) r = ["Page not found", "The page you requested doesn’t exist.", () => head("Page not found", "home", "") + sec(`<p class="em">We couldn’t find that page. <a data-r href="#home">Go to the homepage</a> or <a data-r href="#contact">contact us</a>.</p>`)];
             cur = t; document.title = r[0] + " | " + CO.name; $("meta[name=description]").content = r[1];
             const m = $("#m"); m.classList.remove("pt"); m.innerHTML = r[2](); void m.offsetWidth; m.classList.add("pt"); r[3] && r[3](); bindGodownSlides(); reveal();
             document.querySelectorAll("#nav a").forEach(a => { const h = a.getAttribute("href").slice(1), ex = h == t || (t.startsWith("blog-") && h == "blogs"); a.classList.toggle("on", ex || h == PA[t]); ex ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current") });
             shut(); const d = $("#dlg"); d.open && d.close(); if (document.activeElement) document.activeElement.blur();
-            if (!init) { try { history.replaceState(null, "", "#" + t) } catch (e) { } scrollTo(0, 0); const h = m.querySelector("h1"); if (h) { h.tabIndex = -1; h.focus({ preventScroll: true }) } }
+            if (!skipHistory) { history.pushState(null, "", "#" + t); scrollTo(0, 0); const h = m.querySelector("h1"); if (h) { h.tabIndex = -1; h.focus({ preventScroll: true }) } }
         }
 
         /* ===== shell ===== */
@@ -1696,7 +1696,9 @@
         });
         document.addEventListener("keydown", e => { if (e.key == "Escape") shut() });
         addEventListener("scroll", () => $("header").classList.toggle("s", scrollY > 10), { passive: true });
-        addEventListener("hashchange", () => { const t = location.hash.slice(1) || "home"; if (t != cur) go(t) });
+        const syncRoute = () => { const t = location.hash.slice(1) || "home"; if (t != cur) go(t, true) };
+        addEventListener("popstate", syncRoute);
+        addEventListener("hashchange", syncRoute);
         if (PRICE_API) state = "wait"; tick(); go(location.hash.slice(1) || "home", 1); if (PRICE_API) pull().then(loop);
     </script>
 </body>
